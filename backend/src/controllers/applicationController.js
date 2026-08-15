@@ -20,7 +20,7 @@ exports.applyForJob = async (req, res) => {
       job: jobId,
       student: req.user.id,
       coverLetter: coverLetter || '',
-      resumeUrl: resumeUrl || req.user.studentDetails?.resumeUrl || 'sample-resume.pdf',
+      resumeUrl: resumeUrl || req.user.studentDetails?.resumeUrl || '',
       status: 'Applied'
     });
 

@@ -11,7 +11,7 @@ const StudentProfilePage = () => {
   const [graduationYear, setGraduationYear] = useState(user?.studentDetails?.graduationYear || 2026);
   const [cgpa, setCgpa] = useState(user?.studentDetails?.cgpa || 3.85);
   const [skills, setSkills] = useState(user?.studentDetails?.skills ? user.studentDetails.skills.join(', ') : 'React, Node.js, Python, Flutter, MongoDB');
-  const [resumeName, setResumeName] = useState(user?.studentDetails?.resumeUrl || 'Alex_Johnson_Resume.pdf');
+  const [resumeName, setResumeName] = useState(user?.studentDetails?.resumeUrl || '');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSave = (e) => {
@@ -96,7 +96,11 @@ const StudentProfilePage = () => {
               <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-md)', background: 'rgba(15, 23, 42, 0.6)', border: '2px dashed rgba(255, 255, 255, 0.15)', textAlign: 'center' }}>
                 <FileText size={32} color="var(--accent-cyan)" style={{ margin: '0 auto 0.5rem' }} />
                 <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>Current Active Resume:</p>
-                <p style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>📄 {resumeName}</p>
+                {resumeName ? (
+                  <p style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>📄 {resumeName}</p>
+                ) : (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.75rem', fontStyle: 'italic' }}>No active resume uploaded</p>
+                )}
                 
                 <label className="btn btn-secondary" style={{ cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
                   <Upload size={14} /> Upload New PDF Resume

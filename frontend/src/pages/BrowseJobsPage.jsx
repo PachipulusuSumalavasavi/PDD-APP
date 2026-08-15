@@ -204,7 +204,9 @@ const BrowseJobsPage = () => {
           <div className="form-group">
             <label className="form-label">Attached Resume</label>
             <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>📄 {user?.studentDetails?.resumeUrl || `${user?.name?.replace(/\s+/g, '_')}_Resume.pdf`}</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                {user?.studentDetails?.resumeUrl ? `📄 ${user.studentDetails.resumeUrl}` : '⚠️ No active resume uploaded. Please upload one in your profile.'}
+              </span>
               <span style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>Default Active</span>
             </div>
           </div>

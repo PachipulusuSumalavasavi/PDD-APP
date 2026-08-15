@@ -153,7 +153,7 @@ class DataStore {
         graduationYear: 2026,
         cgpa: 3.8,
         skills: ['React', 'JavaScript', 'Problem Solving'],
-        resumeUrl: `${userData.name.replace(/\s+/g, '_')}_Resume.pdf`
+        resumeUrl: ''
       },
       companyDetails: {
         companyName: userData.companyName || userData.name,
@@ -246,7 +246,7 @@ class DataStore {
       student: studentUser,
       status: 'Applied',
       coverLetter: coverLetter || '',
-      resumeUrl: studentUser.studentDetails?.resumeUrl || `${studentUser.name.replace(/\s+/g, '_')}_Resume.pdf`,
+      resumeUrl: studentUser.studentDetails?.resumeUrl || '',
       appliedAt: new Date().toISOString()
     };
 
