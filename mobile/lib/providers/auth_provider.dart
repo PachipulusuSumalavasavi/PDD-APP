@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
+import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   UserModel? _user;
@@ -9,21 +12,34 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
 
-  void login(String email, String password, String role) {
+  Future<bool> login(String email, String password, String role) async {
     _isLoading = true;
     notifyListeners();
 
-    // Mock Login Session
-    _user = UserModel(
-      id: 'usr-1',
-      name: role == 'company' ? 'Nexus Recruiter' : (role == 'admin' ? 'Admin Officer' : 'Alex Johnson'),
-      email: email,
-      role: role,
-      token: 'flutter-mock-jwt-token',
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        _user = UserModel.fromJson(data);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      print('Error in login: $e');
+    }
 
     _isLoading = false;
     notifyListeners();
+    return false;
   }
 
   void logout() {

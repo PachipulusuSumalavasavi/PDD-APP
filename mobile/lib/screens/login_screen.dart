@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/job_provider.dart';
 import 'student_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,12 +16,50 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController(text: 'password123');
   String _selectedRole = 'student';
 
-  void _handleLogin() {
+  void _handleLogin() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    auth.login(_emailController.text, _passwordController.text, _selectedRole);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+    final jobProv = Provider.of<JobProvider>(context, listen: false);
+
+    // Show loading spinner
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
+
+    final success = await auth.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+      _selectedRole,
+    );
+
+    // Pop loading spinner
+    if (mounted) Navigator.of(context).pop();
+
+    if (success) {
+      // Fetch data from backend
+      await jobProv.fetchJobs();
+      if (auth.user?.token != null) {
+        await jobProv.fetchApplications(auth.user!.token!);
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid credentials. Please verify and try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   @override
