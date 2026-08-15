@@ -77,6 +77,23 @@ const seedData = async () => {
       }
     });
 
+    // Create Ram
+    const ramStudent = await User.create({
+      name: 'ram',
+      email: 'ram@saveetha.com',
+      password: 'Ram@1234',
+      role: 'student',
+      studentDetails: {
+        university: 'Saveetha Engineering College',
+        degree: 'B.Tech Computer Science',
+        graduationYear: 2026,
+        cgpa: 3.85,
+        skills: ['React', 'Node.js', 'Python', 'Flutter', 'MongoDB'],
+        phone: '+1 (555) 123-4567',
+        bio: 'B.Tech Computer Science student at Saveetha Engineering College.'
+      }
+    });
+
     // Create Jobs
     const job1 = await Job.create({
       title: 'Full-Stack Developer Intern',
@@ -135,6 +152,24 @@ const seedData = async () => {
       notes: 'Passed initial screening.'
     });
 
+    // Create Applications for Ram
+    await Application.create({
+      job: job1._id,
+      student: ramStudent._id,
+      status: 'Interview Scheduled',
+      interviewDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      interviewLocation: 'Google Meet',
+      interviewNotes: 'Prepare 15min technical presentation.',
+      notes: 'Excellent candidate profile.'
+    });
+
+    await Application.create({
+      job: job3._id,
+      student: ramStudent._id,
+      status: 'Shortlisted',
+      notes: 'Impressive academic records.'
+    });
+
     // Notifications
     await Notification.create({
       user: student._id,
@@ -148,6 +183,14 @@ const seedData = async () => {
       title: 'Deadline Alert: 2 Days Left ⏳',
       message: 'Application deadline for Graduate Placement Engineer closes soon.',
       type: 'deadline'
+    });
+
+    // Notifications for Ram
+    await Notification.create({
+      user: ramStudent._id,
+      title: 'Interview Scheduled! 📅',
+      message: 'Nexus Tech Innovations scheduled an interview for Full-Stack Developer Intern.',
+      type: 'interview'
     });
 
     console.log('Seeding completed successfully!');
