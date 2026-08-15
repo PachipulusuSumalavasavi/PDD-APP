@@ -4,7 +4,7 @@ import '../models/job_model.dart';
 import '../models/application_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  static const String baseUrl = 'https://pdd-backend-t1am.onrender.com/api';
 
   static List<JobModel> getMockJobs() {
     return [
