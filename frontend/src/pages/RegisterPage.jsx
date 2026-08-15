@@ -10,11 +10,13 @@ const RegisterPage = () => {
   const [role, setRole] = useState('student');
   const [university, setUniversity] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [error, setError] = useState('');
   const { register, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     const res = await register({
       name,
       email,
@@ -28,6 +30,8 @@ const RegisterPage = () => {
       if (res.role === 'student') navigate('/student/dashboard');
       else if (res.role === 'company') navigate('/company/dashboard');
       else if (res.role === 'admin') navigate('/admin/dashboard');
+    } else {
+      setError(res.message || 'Registration failed. Please try again.');
     }
   };
 
@@ -41,6 +45,12 @@ const RegisterPage = () => {
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.6rem', fontWeight: 800 }}>Create CareerMate Account</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Join the internship & placement tracking system</p>
         </div>
+
+        {error && (
+          <div style={{ marginBottom: '1.25rem', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#f43f5e', fontSize: '0.85rem', textAlign: 'center' }}>
+            ❌ {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

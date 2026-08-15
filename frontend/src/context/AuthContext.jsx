@@ -53,9 +53,19 @@ export const AuthProvider = ({ children }) => {
 
     // Post to backend API asynchronously if active
     try {
-      await api.post('/auth/register', formData);
+      const response = await api.post('/auth/register', formData);
+      const data = response.data;
+      
+      setUser(data);
+      localStorage.setItem('careermate_token', data.token);
+      localStorage.setItem('careermate_user', JSON.stringify(data));
+      setLoading(false);
+      return { success: true, role: data.role };
     } catch (e) {
-      // Ignore API offline, dataStore already persisted
+      if (e.response && e.response.data && e.response.data.message) {
+        setLoading(false);
+        return { success: false, message: e.response.data.message };
+      }
     }
 
     setUser(registeredUser);
