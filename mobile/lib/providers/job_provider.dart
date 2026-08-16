@@ -11,8 +11,11 @@ class JobProvider with ChangeNotifier {
   List<String> _savedJobIds = [];
   bool _isLoading = false;
 
+  List<ApplicationModel> _companyApplications = [];
+
   List<JobModel> get jobs => _jobs;
   List<ApplicationModel> get applications => _applications;
+  List<ApplicationModel> get companyApplications => _companyApplications;
   List<String> get savedJobIds => _savedJobIds;
   bool get isLoading => _isLoading;
 
@@ -55,6 +58,28 @@ class JobProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchCompanyApplications(String token) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiService.baseUrl}/applications/company'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        _companyApplications = data.map((json) => ApplicationModel.fromJson(json)).toList();
+      }
+    } catch (e) {
+      print('Error fetching company applications: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void toggleSaveJob(String jobId) {
     if (_savedJobIds.contains(jobId)) {
       _savedJobIds.remove(jobId);
@@ -83,6 +108,55 @@ class JobProvider with ChangeNotifier {
       }
     } catch (e) {
       print('Error applying for job: $e');
+    }
+    return false;
+  }
+
+  Future<bool> createJobMobile(Map<String, dynamic> jobData, String token) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/jobs'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(jobData),
+      );
+      if (response.statusCode == 201) {
+        await fetchJobs();
+        return true;
+      }
+    } catch (e) {
+      print('Error creating job: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  Future<bool> updateCompanyApplicationStatus(
+    String appId,
+    Map<String, dynamic> updateData,
+    String token,
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiService.baseUrl}/applications/$appId/status'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(updateData),
+      );
+      if (response.statusCode == 200) {
+        await fetchCompanyApplications(token);
+        return true;
+      }
+    } catch (e) {
+      print('Error updating application status: $e');
     }
     return false;
   }

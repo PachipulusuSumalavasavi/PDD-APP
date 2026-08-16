@@ -1,5 +1,26 @@
 import 'job_model.dart';
 
+class StudentInfo {
+  final String name;
+  final String email;
+  final String university;
+
+  StudentInfo({
+    required this.name,
+    required this.email,
+    required this.university,
+  });
+
+  factory StudentInfo.fromJson(Map<String, dynamic> json) {
+    final studentDetails = json['studentDetails'] ?? {};
+    return StudentInfo(
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      university: studentDetails['university'] ?? '',
+    );
+  }
+}
+
 class ApplicationModel {
   final String id;
   final JobModel? job;
@@ -8,6 +29,7 @@ class ApplicationModel {
   final DateTime? interviewDate;
   final String? interviewLocation;
   final String? interviewNotes;
+  final StudentInfo? student;
 
   ApplicationModel({
     required this.id,
@@ -17,6 +39,7 @@ class ApplicationModel {
     this.interviewDate,
     this.interviewLocation,
     this.interviewNotes,
+    this.student,
   });
 
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +51,7 @@ class ApplicationModel {
       interviewDate: json['interviewDate'] != null ? DateTime.parse(json['interviewDate']) : null,
       interviewLocation: json['interviewLocation'],
       interviewNotes: json['interviewNotes'],
+      student: json['student'] != null ? StudentInfo.fromJson(json['student']) : null,
     );
   }
 }

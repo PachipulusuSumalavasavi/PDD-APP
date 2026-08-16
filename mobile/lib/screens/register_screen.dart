@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/job_provider.dart';
 import 'student_dashboard_screen.dart';
+import 'recruiter_dashboard_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -53,10 +54,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (mounted) setState(() => _isLoading = false);
 
     if (success) {
-      // Pre-fetch jobs & applications for student
       await jobProv.fetchJobs();
       if (auth.user?.token != null) {
-        await jobProv.fetchApplications(auth.user!.token!);
+        if (auth.user!.role == 'company') {
+          await jobProv.fetchCompanyApplications(auth.user!.token!);
+        } else {
+          await jobProv.fetchApplications(auth.user!.token!);
+        }
       }
 
       if (mounted) {
@@ -67,7 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const StudentDashboardScreen()),
+          MaterialPageRoute(
+            builder: (_) => auth.user?.role == 'company'
+                ? const RecruiterDashboardScreen()
+                : const StudentDashboardScreen(),
+          ),
           (route) => false,
         );
       }
