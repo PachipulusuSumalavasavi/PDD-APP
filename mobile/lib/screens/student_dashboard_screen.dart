@@ -58,7 +58,9 @@ class StudentDashboardHome extends StatelessWidget {
 
     // Calculate dynamic stats
     final totalApps = jobProv.applications.length;
+    final shortlistedCount = jobProv.applications.where((app) => app.status.toLowerCase() == 'shortlisted').length;
     final interviewCount = jobProv.applications.where((app) => app.status.toLowerCase().contains('interview')).length;
+    final selectedCount = jobProv.applications.where((app) => app.status.toLowerCase() == 'selected' || app.status.toLowerCase().contains('offer')).length;
 
     // Find the first scheduled interview (if any)
     final interviewApp = jobProv.applications.firstWhere(
@@ -83,15 +85,18 @@ class StudentDashboardHome extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome, ${auth.user?.name.split(' ')[0] ?? 'Student'} 👋',
-                        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-                      const Text('Application & Placement Hub', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome back, ${auth.user?.name.split(' ')[0] ?? 'Student'} 👋',
+                          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Text('Application & Placement Hub', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+                      ],
+                    ),
                   ),
                   CircleAvatar(
                     backgroundColor: const Color(0xFF6366F1).withOpacity(0.2),
@@ -101,12 +106,19 @@ class StudentDashboardHome extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Stat Cards Grid
-              Row(
+              // Stat Cards Responsive Grid (2x2)
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.35,
                 children: [
-                  Expanded(child: _buildStatCard('Total Apps', '$totalApps', Icons.work, const Color(0xFF6366F1))),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildStatCard('Interviews', '$interviewCount', Icons.videocam, const Color(0xFFF59E0B))),
+                  _buildStatCard('Total Apps', '$totalApps', Icons.work, const Color(0xFF6366F1)),
+                  _buildStatCard('Shortlisted', '$shortlistedCount', Icons.trending_up, const Color(0xFF06B6D4)),
+                  _buildStatCard('Interviews', '$interviewCount', Icons.videocam, const Color(0xFFF59E0B)),
+                  _buildStatCard('Selected', '$selectedCount', Icons.check_circle_outline, const Color(0xFF10B981)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -116,23 +128,67 @@ class StudentDashboardHome extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withOpacity(0.12),
+                    color: const Color(0xFF121A2B),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+                    border: Border(
+                      left: const BorderSide(color: Color(0xFFF59E0B), width: 4),
+                      top: BorderSide(color: Colors.white.withOpacity(0.08)),
+                      right: BorderSide(color: Colors.white.withOpacity(0.08)),
+                      bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
+                    ),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.event, color: Color(0xFFF59E0B), size: 28),
-                      const SizedBox(width: 12),
-                      Expanded(
+                      Row(
+                        children: const [
+                          Icon(Icons.videocam, color: Color(0xFFF59E0B), size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            'Scheduled Interview',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        interviewApp.job?.title ?? 'Role',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        interviewApp.job?.companyName ?? 'Company',
+                        style: const TextStyle(color: Color(0xFF06B6D4), fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Interview Scheduled', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                             Text(
-                              '${interviewApp.job?.title ?? 'Role'} • ${interviewApp.job?.companyName ?? 'Company'}',
-                              style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 12),
+                              '📅 Date: ${interviewApp.interviewDate?.toLocal().toString().split('.')[0] ?? ''}',
+                              style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 12.5, fontWeight: FontWeight.bold),
                             ),
+                            if (interviewApp.interviewLocation != null && interviewApp.interviewLocation!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '📍 Location: ${interviewApp.interviewLocation}',
+                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ],
+                            if (interviewApp.interviewNotes != null && interviewApp.interviewNotes!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '📝 Notes: ${interviewApp.interviewNotes}',
+                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -196,13 +252,24 @@ class StudentDashboardHome extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(app.job?.title ?? 'Role', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          Text(app.job?.companyName ?? 'Company', style: const TextStyle(color: Color(0xFF06B6D4), fontSize: 12)),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              app.job?.title ?? 'Role',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              app.job?.companyName ?? 'Company',
+                              style: const TextStyle(color: Color(0xFF06B6D4), fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       StatusPill(status: app.status),
                     ],
                   ),
@@ -216,7 +283,7 @@ class StudentDashboardHome extends StatelessWidget {
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFF121A2B),
         borderRadius: BorderRadius.circular(16),
@@ -224,11 +291,12 @@ class StudentDashboardHome extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 12),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 6),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11), overflow: TextOverflow.ellipsis),
         ],
       ),
     );

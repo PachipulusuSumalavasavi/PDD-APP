@@ -1,20 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import CalendarView from '../components/CalendarView';
-import { MOCK_JOBS, MOCK_APPLICATIONS } from '../services/api';
+import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
+import { dataStore } from '../services/dataStore';
 import { Clock, Video, AlertCircle } from 'lucide-react';
 
 const DeadlineCalendarPage = () => {
+  const { user } = useContext(AuthContext);
+  const [jobs, setJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+
+  const loadData = async () => {
+    try {
+      const [jobsRes, appsRes] = await Promise.all([
+        api.get('/jobs'),
+        api.get('/applications/student')
+      ]);
+      setJobs(jobsRes.data);
+      setApplications(appsRes.data);
+    } catch (err) {
+      console.error('Error loading calendar data from API:', err);
+      // Fallback
+      setJobs(dataStore.getJobs());
+      if (user) {
+        const allApps = dataStore.getApplications();
+        const myApps = allApps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
+        setApplications(myApps);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
   // Combine job deadlines and scheduled interviews into calendar events
   const events = [
-    ...MOCK_JOBS.map(j => ({
+    ...jobs.map(j => ({
       id: j._id,
       title: j.title,
       company: j.companyName,
       date: j.deadline,
       type: 'deadline'
     })),
-    ...MOCK_APPLICATIONS.filter(a => a.interviewDate).map(a => ({
+    ...applications.filter(a => a.interviewDate).map(a => ({
       id: a._id,
       title: `Interview: ${a.job?.title || 'Engineering Role'}`,
       company: a.job?.companyName || 'Recruiter',

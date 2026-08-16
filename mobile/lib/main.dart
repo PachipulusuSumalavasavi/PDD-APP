@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/job_provider.dart';
-import 'screens/login_screen.dart';
+import 'screens/intro_screen.dart';
 
 void main() {
   runApp(const CareerMateMobileApp());
@@ -28,7 +28,7 @@ class CareerMateMobileApp extends StatelessWidget {
             surface: Color(0xFF121A2B),
           ),
         ),
-        home: const LoginScreen(),
+        home: const IntroScreen(),
       ),
     );
   }

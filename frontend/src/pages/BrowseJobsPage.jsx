@@ -30,17 +30,30 @@ const BrowseJobsPage = () => {
   const [appliedJobIds, setAppliedJobIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadJobsAndApps = () => {
-    const allJobs = dataStore.getJobs();
-    setJobs(allJobs);
+  const loadJobsAndApps = async () => {
+    try {
+      const [jobsRes, appsRes] = await Promise.all([
+        api.get('/jobs'),
+        api.get('/applications/student')
+      ]);
+      setJobs(jobsRes.data);
+      setAppliedJobIds(appsRes.data.map(a => a.job?._id || a.jobId));
+    } catch (err) {
+      console.error('Error loading jobs and applications from API:', err);
+      // Fallback
+      const allJobs = dataStore.getJobs();
+      setJobs(allJobs);
 
-    const apps = dataStore.getApplications();
-    const myApps = apps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
-    setAppliedJobIds(myApps.map(a => a.jobId || a.job?._id));
+      const apps = dataStore.getApplications();
+      const myApps = apps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
+      setAppliedJobIds(myApps.map(a => a.jobId || a.job?._id));
+    }
   };
 
   useEffect(() => {
-    loadJobsAndApps();
+    if (user) {
+      loadJobsAndApps();
+    }
   }, [user]);
 
   const filteredJobs = jobs.filter(j => {
@@ -63,20 +76,27 @@ const BrowseJobsPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Save dynamically to dataStore
-    dataStore.applyForJob(selectedJob._id, user, coverLetter);
-    
+    let success = false;
     try {
       await api.post('/applications/apply', { jobId: selectedJob._id, coverLetter });
-    } catch (e) {
-      // ignore
+      success = true;
+    } catch (apiErr) {
+      console.error('Failed API application, falling back to dataStore:', apiErr);
+      try {
+        dataStore.applyForJob(selectedJob._id, user, coverLetter);
+        success = true;
+      } catch (dsErr) {
+        console.error('Failed dataStore application:', dsErr);
+      }
     }
 
-    addNotification({
-      title: 'Application Submitted! 🎉',
-      message: `Your application for ${selectedJob.title} at ${selectedJob.companyName} was submitted.`,
-      type: 'status_update'
-    });
+    if (success) {
+      addNotification({
+        title: 'Application Submitted! 🎉',
+        message: `Your application for ${selectedJob.title} at ${selectedJob.companyName} was submitted.`,
+        type: 'status_update'
+      });
+    }
 
     setIsSubmitting(false);
     setSelectedJob(null);

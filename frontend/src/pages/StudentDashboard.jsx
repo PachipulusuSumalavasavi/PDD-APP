@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import { dataStore } from '../services/dataStore';
 import { 
   Briefcase, 
@@ -25,22 +26,41 @@ const StudentDashboard = () => {
     selectedCount: 0
   });
 
-  const loadStudentData = () => {
-    const allApps = dataStore.getApplications();
-    const myApps = allApps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
-    setApplications(myApps);
+  const loadStudentData = async () => {
+    try {
+      const [appsRes, statsRes] = await Promise.all([
+        api.get('/applications/student'),
+        api.get('/applications/student/stats')
+      ]);
+      setApplications(appsRes.data);
+      setStats({
+        totalApplications: statsRes.data.totalApplications || 0,
+        appliedCount: statsRes.data.appliedCount || 0,
+        shortlistedCount: statsRes.data.shortlistedCount || 0,
+        interviewCount: statsRes.data.interviewCount || 0,
+        selectedCount: statsRes.data.selectedCount || 0
+      });
+    } catch (err) {
+      console.error('Error loading student data from API:', err);
+      // Fallback
+      const allApps = dataStore.getApplications();
+      const myApps = allApps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
+      setApplications(myApps);
 
-    setStats({
-      totalApplications: myApps.length,
-      appliedCount: myApps.filter(a => a.status === 'Applied').length,
-      shortlistedCount: myApps.filter(a => a.status === 'Shortlisted').length,
-      interviewCount: myApps.filter(a => a.status === 'Interview Scheduled').length,
-      selectedCount: myApps.filter(a => a.status === 'Selected').length
-    });
+      setStats({
+        totalApplications: myApps.length,
+        appliedCount: myApps.filter(a => a.status === 'Applied').length,
+        shortlistedCount: myApps.filter(a => a.status === 'Shortlisted').length,
+        interviewCount: myApps.filter(a => a.status === 'Interview Scheduled').length,
+        selectedCount: myApps.filter(a => a.status === 'Selected').length
+      });
+    }
   };
 
   useEffect(() => {
-    loadStudentData();
+    if (user) {
+      loadStudentData();
+    }
   }, [user]);
 
   const upcomingInterview = applications.find(a => a.status === 'Interview Scheduled');

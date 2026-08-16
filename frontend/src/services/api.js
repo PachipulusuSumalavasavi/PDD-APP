@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://pdd-backend-t1am.onrender.com/api';
+const API_BASE_URL = window.location.origin.includes('localhost')
+  ? '/api'
+  : 'https://pdd-backend-t1am.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

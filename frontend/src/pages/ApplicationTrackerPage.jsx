@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import { dataStore } from '../services/dataStore';
 import { 
   Video, 
@@ -14,14 +15,23 @@ const ApplicationTrackerPage = () => {
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
 
-  const loadApplications = () => {
-    const allApps = dataStore.getApplications();
-    const myApps = allApps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
-    setApplications(myApps);
+  const loadApplications = async () => {
+    try {
+      const appsRes = await api.get('/applications/student');
+      setApplications(appsRes.data);
+    } catch (err) {
+      console.error('Error loading applications from API:', err);
+      // Fallback
+      const allApps = dataStore.getApplications();
+      const myApps = allApps.filter(a => a.studentId === user?._id || a.student?.email === user?.email);
+      setApplications(myApps);
+    }
   };
 
   useEffect(() => {
-    loadApplications();
+    if (user) {
+      loadApplications();
+    }
   }, [user]);
 
   const pipelineColumns = [

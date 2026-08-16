@@ -64,7 +64,7 @@ class JobProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> applyForJob(JobModel job, String token) async {
+  Future<bool> applyForJob(JobModel job, String token, {String? coverLetter}) async {
     try {
       final response = await http.post(
         Uri.parse('${ApiService.baseUrl}/applications/apply'),
@@ -74,6 +74,7 @@ class JobProvider with ChangeNotifier {
         },
         body: jsonEncode({
           'jobId': job.id,
+          'coverLetter': coverLetter ?? '',
         }),
       );
       if (response.statusCode == 201) {

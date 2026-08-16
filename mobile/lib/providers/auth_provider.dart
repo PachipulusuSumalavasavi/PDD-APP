@@ -42,6 +42,47 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    String? university,
+    String? companyName,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'role': role,
+          if (role == 'student') 'university': university ?? '',
+          if (role == 'company') 'companyName': companyName ?? '',
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        _user = UserModel.fromJson(data);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      print('Error in registration: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
   void logout() {
     _user = null;
     notifyListeners();
