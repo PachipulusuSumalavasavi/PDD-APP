@@ -125,7 +125,6 @@ class _DeadlineCalendarScreenState extends State<DeadlineCalendarScreen> {
                   _focusedDay = focusedDay;
                 },
                 eventLoader: (day) => _getEventsForDay(day, eventsMap),
-                style: const TextStyle(color: Colors.white),
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: true,
                   titleCentered: true,

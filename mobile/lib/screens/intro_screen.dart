@@ -40,11 +40,11 @@ class IntroScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   const Text(
                     'Career',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.extrabold, letterSpacing: -0.5),
+                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5),
                   ),
                   const Text(
                     'Mate',
-                    style: TextStyle(color: Color(0xFF06B6D4), fontSize: 20, fontWeight: FontWeight.extrabold, letterSpacing: -0.5),
+                    style: TextStyle(color: Color(0xFF06B6D4), fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5),
                   ),
                 ],
               ),

@@ -121,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const Text(
                     'Create CareerMate Account',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.extrabold),
+                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   const Text(
